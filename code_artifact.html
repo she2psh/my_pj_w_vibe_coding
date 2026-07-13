@@ -18,7 +18,7 @@
                         darker: '#121212',
                         card: '#1e1e1e',
                         neon: '#00f3ff',
-                        neonDark: '#0ea5e9', // 라이트모드에서의 활력소 역할을 할 딥 시안
+                        neonDark: '#0ea5e9', // 라이트모드 딥 시안
                     },
                     fontFamily: { sans: ['"Noto Sans KR"', 'sans-serif'] }
                 }
@@ -27,7 +27,7 @@
     </script>
     
     <style>
-        /* 테마 변경 시 부드럽게 배경과 색상이 전환되도록 트랜지션 추가 */
+        /* 테마 전환용 트랜지션 및 부드러운 스크롤 */
         body {
             transition: background-color 0.5s ease, color 0.5s ease;
             scroll-behavior: smooth;
@@ -41,7 +41,7 @@
             opacity: 1; 
             transform: translateY(0); 
         }
-        /* 텍스트 글로우 효과: 다크모드에서 더 빛나도록 설정 */
+        /* 다크모드에서 빛나는 전용 텍스트 글로우 */
         .text-glow { 
             text-shadow: 0 0 10px rgba(0, 243, 255, 0.4); 
         }
@@ -49,40 +49,54 @@
             text-shadow: 0 0 15px rgba(0, 243, 255, 0.7);
         }
 
-        /* --- 개편된 모드별 호버 효과 (강도 축소 및 분리) --- */
-        /* 1. 라이트 모드: 눈이 편안하고 우아한 미니멀리즘 쉐도우 및 테두리 */
-        .cyber-card {
-            position: relative;
-            background: rgb(255, 255, 255);
-            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease, border-color 0.3s ease;
-        }
-        .cyber-card:hover {
-            border-color: #3b82f6; /* 자연스러운 블루 외곽선 */
-            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.08), 0 8px 10px -6px rgba(59, 130, 246, 0.08);
+        /* --- 1. 마우스 조작이 가능한 PC 환경에서의 호버 효과 (PC 전용) --- */
+        @media (hover: hover) {
+            /* 라이트 모드 PC 호버 */
+            .cyber-card {
+                position: relative;
+                background: rgb(255, 255, 255);
+                transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+            }
+            .cyber-card:hover {
+                border-color: #3b82f6;
+                box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.08), 0 8px 10px -6px rgba(59, 130, 246, 0.08);
+                transform: translateY(-4px); /* 호버 시 PC에서만 매끄럽게 솟아오름 */
+            }
+
+            /* 다크 모드 PC 호버 */
+            .dark .cyber-card {
+                background: #1e1e1e;
+                transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease;
+            }
+            .dark .cyber-card::before {
+                content: '';
+                position: absolute;
+                inset: -1.2px;
+                border-radius: 16px;
+                background: linear-gradient(90deg, #00f3ff, #3b82f6, #00f3ff);
+                background-size: 200% auto;
+                z-index: -1;
+                opacity: 0;
+                transition: opacity 0.4s ease-in-out;
+            }
+            .dark .cyber-card:hover::before {
+                opacity: 0.55;
+                animation: neon-border-flow 3.5s linear infinite; /* 고요하게 흐르는 네온 테두리 */
+            }
+            .dark .cyber-card:hover {
+                box-shadow: 0 8px 22px -4px rgba(0, 243, 255, 0.12);
+                transform: translateY(-4px); /* 호버 시 PC에서만 매끄럽게 솟아오름 */
+            }
         }
 
-        /* 2. 다크 모드: 속도를 대폭 늦추고 두께를 최소화한 절제된 네온 오라(Aura) */
-        .dark .cyber-card {
-            background: #1e1e1e; /* matches dark:bg-card */
-            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease;
-        }
-        .dark .cyber-card::before {
-            content: '';
-            position: absolute;
-            inset: -1.2px; /* 회전하는 네온 선 두께를 얇고 고급스럽게 변경 */
-            border-radius: 16px; /* 1rem = 16px (rounded-2xl) */
-            background: linear-gradient(90deg, #00f3ff, #3b82f6, #00f3ff);
-            background-size: 200% auto;
-            z-index: -1;
-            opacity: 0;
-            transition: opacity 0.4s ease-in-out;
-        }
-        .dark .cyber-card:hover::before {
-            opacity: 0.55; /* 너무 강하게 빛나지 않도록 반투명하게 낮춤 */
-            animation: neon-border-flow 3.5s linear infinite; /* 느리고 고요하게 회전 (기존 1.5초 -> 3.5초) */
-        }
-        .dark .cyber-card:hover {
-            box-shadow: 0 8px 22px -4px rgba(0, 243, 255, 0.12); /* 과하지 않은 후면 수채화 광채 효과 */
+        /* --- 2. 터치 중심의 모바일 기기 환경에서의 터치 피드백 (모바일 전용) --- */
+        @media (hover: none) {
+            .cyber-card {
+                transition: transform 0.1s ease;
+            }
+            .cyber-card:active {
+                transform: scale(0.97); /* 터치 시 쫀득하게 눌리는 물리적인 반응형 반환 */
+            }
         }
 
         @keyframes neon-border-flow {
@@ -92,7 +106,7 @@
     </style>
     
     <script>
-        // 초기 테마 설정을 깜빡임 없이 적용하기 위해 헤드 상단에서 실행
+        // 무중단 초기 테마 렌더링
         (function() {
             const savedTheme = localStorage.getItem('theme');
             const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -117,11 +131,11 @@
             
             <!-- Dark / Light Mode Toggle Button -->
             <button id="theme-toggle" class="relative inline-flex items-center justify-center p-2.5 rounded-xl bg-slate-100 dark:bg-gray-800 text-slate-700 dark:text-yellow-400 hover:bg-slate-200 dark:hover:bg-gray-700 transition-all duration-300 shadow-sm border border-slate-200 dark:border-gray-700 focus:outline-none" aria-label="화면 모드 전환">
-                <!-- Sun Icon (Visible in Dark Mode) -->
+                <!-- Sun Icon -->
                 <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 transition-transform duration-300 rotate-0 dark:block hover:rotate-45" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                     <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464a1 1 0 10-1.414 1.414l.707.707a1 1 0 001.414-1.414l-.707-.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path>
                 </svg>
-                <!-- Moon Icon (Visible in Light Mode) -->
+                <!-- Moon Icon -->
                 <svg id="theme-toggle-dark-icon" class="block w-5 h-5 transition-transform duration-300 dark:hidden hover:-rotate-12" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                     <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
                 </svg>
@@ -142,7 +156,6 @@
                 제 플레이 타임이 증명합니다. 깐깐하게 엄선하고 직접 검증한 취향 100% 반영 주말 보장 인생작 리스트.
             </p>
         </div>
-        <!-- Decorative grid backgrounds -->
         <div class="absolute inset-0 bg-[linear-gradient(to_right,#00000005_1px,transparent_1px),linear-gradient(to_bottom,#00000005_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] pointer-events-none"></div>
     </header>
 
@@ -155,9 +168,8 @@
                 #01 함께할 때 즐거움이 2배
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- -->
                 <!-- Card 1 -->
-                <article class="cyber-card bg-white dark:bg-card rounded-2xl border border-slate-200/80 dark:border-gray-800 transition-all duration-300 cursor-pointer relative group shadow-sm hover:shadow-md dark:shadow-none hover:-translate-y-1" 
+                <article class="cyber-card bg-white dark:bg-card rounded-2xl border border-slate-200/80 dark:border-gray-800 transition-all duration-300 cursor-pointer relative group shadow-sm hover:shadow-md dark:shadow-none" 
                          onclick="openModal('그랑블루 판타지: 리링크', 'IETPDqkbDLg')">
                     <div class="aspect-video relative overflow-hidden rounded-t-2xl bg-slate-900">
                         <div class="absolute top-3 right-3 z-20 bg-cyan-500 dark:bg-neon text-white dark:text-darker text-xs font-bold px-3 py-1 rounded-full animate-pulse shadow-sm">
@@ -172,7 +184,7 @@
                 </article>
 
                 <!-- Card 2 -->
-                <article class="cyber-card bg-white dark:bg-card rounded-2xl border border-slate-200/80 dark:border-gray-800 transition-all duration-300 cursor-pointer group shadow-sm hover:shadow-md dark:shadow-none hover:-translate-y-1" 
+                <article class="cyber-card bg-white dark:bg-card rounded-2xl border border-slate-200/80 dark:border-gray-800 transition-all duration-300 cursor-pointer group shadow-sm hover:shadow-md dark:shadow-none" 
                          onclick="openModal('Rabbit and Steel', 'mZfcz9XtYVQ')">
                     <div class="aspect-video relative overflow-hidden rounded-t-2xl bg-slate-900">
                         <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2132850/header.jpg" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Rabbit and Steel">
@@ -184,7 +196,7 @@
                 </article>
 
                 <!-- Card 3 -->
-                <article class="cyber-card bg-white dark:bg-card rounded-2xl border border-slate-200/80 dark:border-gray-800 transition-all duration-300 cursor-pointer group shadow-sm hover:shadow-md dark:shadow-none hover:-translate-y-1" 
+                <article class="cyber-card bg-white dark:bg-card rounded-2xl border border-slate-200/80 dark:border-gray-800 transition-all duration-300 cursor-pointer group shadow-sm hover:shadow-md dark:shadow-none" 
                          onclick="openModal('Slay the Spire 2', 'lYS66AZEtRA')">
                     <div class="aspect-video relative overflow-hidden rounded-t-2xl bg-slate-900">
                         <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2868840/header.jpg" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Slay the Spire 2">
@@ -203,9 +215,8 @@
                 #02 극한의 성취감
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- -->
                 <!-- Card 4 -->
-                <article class="cyber-card bg-white dark:bg-card rounded-2xl border border-slate-200/80 dark:border-gray-800 transition-all duration-300 cursor-pointer group shadow-sm hover:shadow-md dark:shadow-none hover:-translate-y-1" 
+                <article class="cyber-card bg-white dark:bg-card rounded-2xl border border-slate-200/80 dark:border-gray-800 transition-all duration-300 cursor-pointer group shadow-sm hover:shadow-md dark:shadow-none" 
                          onclick="openModal('할로우 나이트: 실크송', 'yQxwbZsL14Y')">
                     <div class="aspect-video relative overflow-hidden rounded-t-2xl bg-slate-900">
                         <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1030300/header.jpg" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="할로우 나이트: 실크송">
@@ -224,9 +235,8 @@
                 #03 발상의 전환
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- -->
                 <!-- Card 5 -->
-                <article class="cyber-card bg-white dark:bg-card rounded-2xl border border-slate-200/80 dark:border-gray-800 transition-all duration-300 cursor-pointer group shadow-sm hover:shadow-md dark:shadow-none hover:-translate-y-1" 
+                <article class="cyber-card bg-white dark:bg-card rounded-2xl border border-slate-200/80 dark:border-gray-800 transition-all duration-300 cursor-pointer group shadow-sm hover:shadow-md dark:shadow-none" 
                          onclick="openModal('바바 이즈 유', 'Ca5BYKRVXHM')">
                     <div class="aspect-video relative overflow-hidden rounded-t-2xl bg-slate-900">
                         <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/736260/header.jpg" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="바바 이즈 유">
@@ -238,7 +248,7 @@
                 </article>
 
                 <!-- Card 6 -->
-                <article class="cyber-card bg-white dark:bg-card rounded-2xl border border-slate-200/80 dark:border-gray-800 transition-all duration-300 cursor-pointer group shadow-sm hover:shadow-md dark:shadow-none hover:-translate-y-1" 
+                <article class="cyber-card bg-white dark:bg-card rounded-2xl border border-slate-200/80 dark:border-gray-800 transition-all duration-300 cursor-pointer group shadow-sm hover:shadow-md dark:shadow-none" 
                          onclick="openModal('스플릿 픽션', 'ry7A7RHvskM')">
                     <div class="aspect-video relative overflow-hidden rounded-t-2xl bg-slate-900">
                         <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2001120/header.jpg" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="스플릿 픽션">
@@ -255,7 +265,7 @@
         <section id="comments-section" class="py-12 border-t border-slate-200 dark:border-gray-800 mt-12 reveal">
             <h2 class="text-2xl font-bold mb-8 border-l-4 border-cyan-500 dark:border-neon pl-4 tracking-tight flex items-center gap-2">
                 💬 플레이어 수다방
-                <span id="comment-count" class="text-sm bg-slate-100 dark:bg-gray-800 text-cyan-600 dark:text-neon px-2.5 py-0.5 rounded-full font-semibold">3</span>
+                <span id="comment-count" class="text-sm bg-slate-100 dark:bg-gray-800 text-cyan-600 dark:text-neon px-2.5 py-0.5 rounded-full font-semibold">0</span>
             </h2>
 
             <!-- Comment Input Card -->
@@ -283,7 +293,7 @@
 
             <!-- Comment List Container -->
             <div id="comment-list" class="space-y-4">
-                <!-- Comments will be injected here dynamically -->
+                <!-- Comments dynamically loaded -->
             </div>
         </section>
     </main>
@@ -304,16 +314,19 @@
         </div>
     </div>
 
-    <!-- Floating Toast Notification Container -->
-    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
+    <!-- Floating Toast Notification Container (PC/Mobile Responsive Position) -->
+    <div id="toast-container" class="fixed bottom-4 left-1/2 -translate-x-1/2 sm:bottom-6 sm:right-6 sm:left-auto sm:translate-x-0 z-50 flex flex-col gap-2 pointer-events-none w-[calc(100%-2rem)] sm:w-auto max-w-sm"></div>
 
-    <!-- Modal -->
+    <!-- Video Modal with Full Responsive & Modern X Button -->
     <div id="video-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/95 opacity-0 pointer-events-none transition-opacity duration-300">
-        <div class="bg-white dark:bg-card w-full max-w-4xl mx-4 rounded-2xl overflow-hidden border border-slate-200 dark:border-neon/50 shadow-2xl">
-            <div class="flex justify-between items-center p-4 border-b border-slate-200 dark:border-gray-800">
-                <h3 id="modal-title" class="text-slate-900 dark:text-white font-bold text-lg">트레일러</h3>
-                <button onclick="closeModal()" class="text-slate-500 dark:text-white hover:text-cyan-500 dark:hover:text-neon text-sm font-semibold transition-colors duration-200 focus:outline-none">
-                    닫기
+        <div class="bg-white dark:bg-card w-full max-w-4xl sm:mx-4 rounded-none sm:rounded-2xl overflow-hidden border-none sm:border border-slate-200 dark:border-neon/50 shadow-2xl">
+            <div class="flex justify-between items-center p-3 sm:p-4 border-b border-slate-200 dark:border-gray-800">
+                <h3 id="modal-title" class="text-slate-900 dark:text-white font-bold text-base sm:text-lg">트레일러</h3>
+                <!-- Expanded Touch Target "X" button (min 44px) -->
+                <button onclick="closeModal()" class="w-11 h-11 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-gray-800 text-slate-500 dark:text-white transition-colors duration-200 focus:outline-none" aria-label="닫기">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
                 </button>
             </div>
             <div class="aspect-video relative bg-black">
@@ -327,10 +340,8 @@
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, addDoc, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- FIREBASE CONFIGURATION & INITIALIZATION ---
+        // --- FIREBASE CONFIGURATION ---
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'weekend-game-6-curation';
-        
-        // Use environment firebase config or fallback to a standard local emulator setup
         const firebaseConfig = typeof __firebase_config !== 'undefined' 
             ? JSON.parse(__firebase_config) 
             : {
@@ -347,7 +358,6 @@
         const auth = getAuth(app);
         let currentUser = null;
 
-        // Strict DB Path: /artifacts/{appId}/public/data/comments
         const commentsCollection = collection(db, 'artifacts', appId, 'public', 'data', 'comments');
 
         // Modal Actions
@@ -369,7 +379,6 @@
 
         // Theme Toggle Functionality
         const themeToggleBtn = document.getElementById('theme-toggle');
-
         themeToggleBtn.addEventListener('click', function() {
             if (document.documentElement.classList.contains('dark')) {
                 document.documentElement.classList.remove('dark');
@@ -380,14 +389,10 @@
             }
         });
 
-        // --- COMMENT SECTION LOGIC ---
-        
-        // Empty initial comments array to load fresh from Firestore
+        // --- COMMENTS ENGINE ---
         let comments = [];
         let commentToDeleteId = null;
 
-
-        // Dynamic Relative Time Formatter
         function formatTime(timestamp) {
             if (!timestamp) return '방금 전';
             const diff = Date.now() - timestamp;
@@ -400,7 +405,6 @@
             return `${days}일 전`;
         }
 
-        // Function to render comment list
         function renderComments() {
             const listContainer = document.getElementById('comment-list');
             const countBadge = document.getElementById('comment-count');
@@ -425,8 +429,9 @@
                         </div>
                         <p class="text-slate-600 dark:text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">${escapeHTML(comment.text)}</p>
                     </div>
+                    <!-- Expanded mobile target size padding for Delete Button -->
                     <button onclick="openDeleteModal('${comment.id}')" 
-                            class="text-xs text-slate-400 hover:text-red-500 dark:text-slate-500 dark:hover:text-red-400 p-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-gray-800/60 transition-all focus:outline-none"
+                            class="text-xs text-slate-400 hover:text-red-500 dark:text-slate-500 dark:hover:text-red-400 p-3 sm:p-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-gray-800/60 transition-all focus:outline-none"
                             aria-label="댓글 삭제">
                         삭제
                     </button>
@@ -434,8 +439,6 @@
             `).join('');
         }
 
-
-        // Step-by-step Auth Guard & Initializer
         async function authenticateAndSync() {
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -445,19 +448,15 @@
                     const credentials = await signInAnonymously(auth);
                     currentUser = credentials.user;
                 }
-                
-                // Once authenticated, subscribe to database
                 setupDatabaseListener();
             } catch (err) {
-                console.error("Database authentication failed: ", err);
-                showToast("네트워크 인증 중 요류가 발생했습니다. 실시간 연동이 불안정할 수 있습니다.", "error");
+                console.error("Authentication failed: ", err);
+                showToast("인증 에러가 발생하여 실시간 연동이 제한될 수 있습니다.", "error");
             }
         }
 
-        // Live real-time update engine from Firestore
         function setupDatabaseListener() {
             if (!currentUser) return;
-
             onSnapshot(commentsCollection, (snapshot) => {
                 const list = [];
                 snapshot.forEach((doc) => {
@@ -469,62 +468,48 @@
                         createdAt: data.createdAt || Date.now()
                     });
                 });
-
-                // Rule 2 Check: Fetch all, then sort in JS memory descending (newest first)
                 list.sort((a, b) => b.createdAt - a.createdAt);
-                
                 comments = list;
                 renderComments();
             }, (error) => {
-                console.error("Failed to fetch comments: ", error);
-                showToast("실시간 데이터를 가져오는데 실패했습니다.", "error");
+                console.error("Database sync failed: ", error);
+                showToast("데이터 갱신 도중 지연이 발생했습니다.", "error");
             });
         }
 
-
-        // Handler for submitting comment form to Firestore
         window.handleCommentSubmit = async function(event) {
             event.preventDefault();
-            
             if (!currentUser) {
-                showToast("사용자 인증을 기다리는 중입니다. 잠시 후 다시 시도해 주세요.", "error");
+                showToast("인증 초기화 중입니다. 조금 뒤 다시 써주세요.", "error");
                 return;
             }
 
             const authorInput = document.getElementById('comment-author');
             const textInput = document.getElementById('comment-text');
-            
             const author = authorInput.value.trim();
             const text = textInput.value.trim();
             
             if (!author || !text) {
-                showToast('닉네임과 내용을 모두 올바르게 입력해주세요.', 'error');
+                showToast('닉네임과 내용을 모두 적어주세요.', 'error');
                 return;
             }
 
             try {
-                const newComment = {
+                await addDoc(commentsCollection, {
                     author: author,
                     text: text,
                     createdAt: Date.now(),
                     userId: currentUser.uid
-                };
-
-                // Save strictly to public path
-                await addDoc(commentsCollection, newComment);
-                
-                // Clear input elements
+                });
                 authorInput.value = '';
                 textInput.value = '';
-                
-                showToast('댓글이 성공적으로 등록되었습니다!', 'success');
+                showToast('한마디가 성공적으로 등록되었습니다!', 'success');
             } catch (err) {
-                console.error("Failed to add comment to cloud: ", err);
-                showToast("댓글 게시에 실패했습니다. 다시 시도해 주세요.", "error");
+                console.error("Comment submit failed: ", err);
+                showToast("서버 통신 실패로 등록하지 못했습니다.", "error");
             }
         };
 
-        // HTML Escaper to prevent XSS
         function escapeHTML(str) {
             return str.replace(/[&<>'"]/g, 
                 tag => ({
@@ -537,36 +522,28 @@
             );
         }
 
-        // Custom Toast Notification Maker
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            
             const bgClass = type === 'success' 
-                ? 'bg-emerald-500 dark:bg-emerald-600 text-white' 
-                : 'bg-red-500 dark:bg-red-600 text-white';
+                ? 'bg-emerald-500 dark:bg-emerald-600 text-white shadow-emerald-500/10' 
+                : 'bg-red-500 dark:bg-red-600 text-white shadow-red-500/10';
             
-            toast.className = `flex items-center gap-2.5 px-4 py-3 rounded-xl shadow-lg text-sm font-semibold transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto ${bgClass}`;
+            toast.className = `flex items-center gap-2.5 px-4 py-3 rounded-xl shadow-lg text-sm font-semibold transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto ${bgClass} w-full sm:w-auto`;
             toast.innerHTML = `<span>${message}</span>`;
             
             container.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.classList.remove('translate-y-2', 'opacity-0');
-            }, 10);
-            
+            setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 10);
             setTimeout(() => {
                 toast.classList.add('translate-y-2', 'opacity-0');
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
         }
 
-        // Custom Delete Modal Handlers
         window.openDeleteModal = function(id) {
             commentToDeleteId = id;
             const modal = document.getElementById('delete-modal');
             const card = document.getElementById('delete-modal-card');
-            
             modal.classList.remove('opacity-0', 'pointer-events-none');
             card.classList.remove('scale-95');
             card.classList.add('scale-100');
@@ -576,33 +553,30 @@
             commentToDeleteId = null;
             const modal = document.getElementById('delete-modal');
             const card = document.getElementById('delete-modal-card');
-            
             modal.classList.add('opacity-0', 'pointer-events-none');
             card.classList.remove('scale-100');
             card.classList.add('scale-95');
         };
 
-        // Bind delete confirm button action (to Firestore)
         document.getElementById('confirm-delete-btn').addEventListener('click', async function() {
             if (commentToDeleteId && currentUser) {
                 try {
                     const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'comments', commentToDeleteId);
                     await deleteDoc(docRef);
                     closeDeleteModal();
-                    showToast('댓글이 삭제되었습니다.', 'success');
+                    showToast('해당 글이 안전하게 삭제되었습니다.', 'success');
                 } catch (err) {
-                    console.error("Failed to delete comment: ", err);
-                    showToast("댓글 삭제 도중 오류가 발생했습니다.", "error");
+                    console.error("Delete failed: ", err);
+                    showToast("삭제 작업을 처리하지 못했습니다.", "error");
                 }
             }
         });
 
-        // Close modal when clicking dark background
         document.getElementById('delete-modal').addEventListener('click', function(e) {
             if (e.target.id === 'delete-modal') closeDeleteModal();
         });
 
-        // Scroll Animation Element Reveal
+        // Scroll Animation
         const revealElements = document.querySelectorAll('.reveal');
         const handleScroll = () => {
             revealElements.forEach((el) => {
@@ -612,10 +586,8 @@
                 }
             });
         };
-        
         window.addEventListener('scroll', handleScroll);
 
-        // Periodically update the relative times on screen
         setInterval(() => {
             document.querySelectorAll('#comment-list [data-timestamp]').forEach(el => {
                 const timestamp = parseInt(el.getAttribute('data-timestamp'), 10);
@@ -623,12 +595,11 @@
                     el.textContent = formatTime(timestamp);
                 }
             });
-        }, 30000); // Update every 30 seconds
-        
-        // Initializer
+        }, 30000);
+
         document.addEventListener("DOMContentLoaded", () => {
             handleScroll();
-            authenticateAndSync(); // Start authentication first, then load Firestore lists
+            authenticateAndSync();
         });
     </script>
 </body>
