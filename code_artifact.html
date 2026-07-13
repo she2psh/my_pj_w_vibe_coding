@@ -206,7 +206,62 @@
                 </article>
             </div>
         </section>
+
+        <!-- Comments Section -->
+        <section id="comments-section" class="py-12 border-t border-slate-200 dark:border-gray-800 mt-12 reveal">
+            <h2 class="text-2xl font-bold mb-8 border-l-4 border-cyan-500 dark:border-neon pl-4 tracking-tight flex items-center gap-2">
+                💬 플레이어 수다방
+                <span id="comment-count" class="text-sm bg-slate-100 dark:bg-gray-800 text-cyan-600 dark:text-neon px-2.5 py-0.5 rounded-full font-semibold">3</span>
+            </h2>
+
+            <!-- Comment Input Card -->
+            <div class="bg-white dark:bg-card rounded-2xl p-6 border border-slate-200/80 dark:border-gray-800/85 shadow-sm mb-8">
+                <form id="comment-form" onsubmit="handleCommentSubmit(event)" class="space-y-4">
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <div class="w-full sm:w-1/3">
+                            <label for="comment-author" class="block text-xs font-semibold text-slate-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">닉네임</label>
+                            <input type="text" id="comment-author" required maxlength="15" placeholder="닉네임 입력" 
+                                   class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-darker text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:focus:ring-neon transition-all text-sm">
+                        </div>
+                        <div class="w-full sm:w-2/3">
+                            <label for="comment-text" class="block text-xs font-semibold text-slate-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">내용</label>
+                            <textarea id="comment-text" required maxlength="200" placeholder="인생 게임 추천이나 소감을 자유롭게 나누어보세요! (최대 200자)" rows="1"
+                                      class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-darker text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:focus:ring-neon transition-all text-sm resize-none"></textarea>
+                        </div>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="submit" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 dark:from-neon dark:to-blue-500 dark:hover:from-cyan-400 dark:hover:to-blue-400 text-white dark:text-darker font-bold text-sm shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
+                            댓글 등록하기
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Comment List Container -->
+            <div id="comment-list" class="space-y-4">
+                <!-- Comments will be injected here dynamically -->
+            </div>
+        </section>
     </main>
+
+    <!-- Custom Delete Confirmation Modal -->
+    <div id="delete-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 opacity-0 pointer-events-none transition-opacity duration-300 backdrop-blur-sm">
+        <div class="bg-white dark:bg-card w-full max-w-sm mx-4 rounded-2xl p-6 border border-slate-200 dark:border-gray-800 shadow-2xl transform scale-95 transition-transform duration-300" id="delete-modal-card">
+            <h3 class="text-slate-900 dark:text-white font-bold text-lg mb-2">댓글 삭제</h3>
+            <p class="text-slate-500 dark:text-gray-400 text-sm mb-6">정말로 이 댓글을 삭제하시겠습니까? 삭제 후에는 복구할 수 없습니다.</p>
+            <div class="flex justify-end gap-3">
+                <button onclick="closeDeleteModal()" class="px-4 py-2 text-sm font-semibold rounded-xl text-slate-500 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-gray-800 transition-colors">
+                    취소
+                </button>
+                <button id="confirm-delete-btn" class="px-4 py-2 text-sm font-semibold rounded-xl bg-red-500 hover:bg-red-600 text-white transition-colors shadow-md">
+                    삭제하기
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
     <!-- Modal -->
     <div id="video-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/95 opacity-0 pointer-events-none transition-opacity duration-300">
@@ -223,7 +278,34 @@
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, addDoc, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- FIREBASE CONFIGURATION & INITIALIZATION ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'weekend-game-6-curation';
+        
+        // Use environment firebase config or fallback to a standard local emulator setup
+        const firebaseConfig = typeof __firebase_config !== 'undefined' 
+            ? JSON.parse(__firebase_config) 
+            : {
+                apiKey: "mock-api-key",
+                authDomain: "mock-auth-domain",
+                projectId: "mock-project-id",
+                storageBucket: "mock-storage-bucket",
+                messagingSenderId: "mock-sender-id",
+                appId: "mock-app-id"
+              };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        let currentUser = null;
+
+        // Strict DB Path: /artifacts/{appId}/public/data/comments
+        const commentsCollection = collection(db, 'artifacts', appId, 'public', 'data', 'comments');
+
         // Modal Actions
         window.openModal = function(title, videoId) {
             const modal = document.getElementById('video-modal');
@@ -245,7 +327,6 @@
         const themeToggleBtn = document.getElementById('theme-toggle');
 
         themeToggleBtn.addEventListener('click', function() {
-            // Toggle 'dark' class on <html> element
             if (document.documentElement.classList.contains('dark')) {
                 document.documentElement.classList.remove('dark');
                 localStorage.setItem('theme', 'light');
@@ -253,6 +334,228 @@
                 document.documentElement.classList.add('dark');
                 localStorage.setItem('theme', 'dark');
             }
+        });
+
+        // --- COMMENT SECTION LOGIC ---
+        
+        // Empty initial comments array to load fresh from Firestore
+        let comments = [];
+        let commentToDeleteId = null;
+
+
+        // Dynamic Relative Time Formatter
+        function formatTime(timestamp) {
+            if (!timestamp) return '방금 전';
+            const diff = Date.now() - timestamp;
+            const minutes = Math.floor(diff / 60000);
+            if (minutes < 1) return '방금 전';
+            const hours = Math.floor(minutes / 60);
+            if (hours < 1) return `${minutes}분 전`;
+            const days = Math.floor(hours / 24);
+            if (days < 1) return `${hours}시간 전`;
+            return `${days}일 전`;
+        }
+
+        // Function to render comment list
+        function renderComments() {
+            const listContainer = document.getElementById('comment-list');
+            const countBadge = document.getElementById('comment-count');
+            
+            countBadge.textContent = comments.length;
+            
+            if (comments.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="text-center py-12 bg-white dark:bg-card rounded-2xl border border-dashed border-slate-200 dark:border-gray-800">
+                        <p class="text-slate-400 dark:text-gray-500 text-sm">아직 작성된 한마디가 없습니다. 첫 한마디의 주인공이 되어보세요!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            listContainer.innerHTML = comments.map(comment => `
+                <div id="${comment.id}" class="bg-white dark:bg-card rounded-2xl p-5 border border-slate-200/80 dark:border-gray-800/80 shadow-sm transition-all duration-300 hover:border-slate-300 dark:hover:border-gray-700 flex justify-between items-start gap-4">
+                    <div class="space-y-1.5 flex-1">
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-slate-800 dark:text-white text-sm">${escapeHTML(comment.author)}</span>
+                            <span class="text-xs text-slate-400 dark:text-slate-500" data-timestamp="${comment.createdAt}">${formatTime(comment.createdAt)}</span>
+                        </div>
+                        <p class="text-slate-600 dark:text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">${escapeHTML(comment.text)}</p>
+                    </div>
+                    <button onclick="openDeleteModal('${comment.id}')" 
+                            class="text-xs text-slate-400 hover:text-red-500 dark:text-slate-500 dark:hover:text-red-400 p-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-gray-800/60 transition-all focus:outline-none"
+                            aria-label="댓글 삭제">
+                        삭제
+                    </button>
+                </div>
+            `).join('');
+        }
+
+
+        // Step-by-step Auth Guard & Initializer
+        async function authenticateAndSync() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    const credentials = await signInWithCustomToken(auth, __initial_auth_token);
+                    currentUser = credentials.user;
+                } else {
+                    const credentials = await signInAnonymously(auth);
+                    currentUser = credentials.user;
+                }
+                
+                // Once authenticated, subscribe to database
+                setupDatabaseListener();
+            } catch (err) {
+                console.error("Database authentication failed: ", err);
+                showToast("네트워크 인증 중 요류가 발생했습니다. 실시간 연동이 불안정할 수 있습니다.", "error");
+            }
+        }
+
+        // Live real-time update engine from Firestore
+        function setupDatabaseListener() {
+            if (!currentUser) return;
+
+            onSnapshot(commentsCollection, (snapshot) => {
+                const list = [];
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    list.push({
+                        id: doc.id,
+                        author: data.author || '익명',
+                        text: data.text || '',
+                        createdAt: data.createdAt || Date.now()
+                    });
+                });
+
+                // Rule 2 Check: Fetch all, then sort in JS memory descending (newest first)
+                list.sort((a, b) => b.createdAt - a.createdAt);
+                
+                comments = list;
+                renderComments();
+            }, (error) => {
+                console.error("Failed to fetch comments: ", error);
+                showToast("실시간 데이터를 가져오는데 실패했습니다.", "error");
+            });
+        }
+
+
+        // Handler for submitting comment form to Firestore
+        window.handleCommentSubmit = async function(event) {
+            event.preventDefault();
+            
+            if (!currentUser) {
+                showToast("사용자 인증을 기다리는 중입니다. 잠시 후 다시 시도해 주세요.", "error");
+                return;
+            }
+
+            const authorInput = document.getElementById('comment-author');
+            const textInput = document.getElementById('comment-text');
+            
+            const author = authorInput.value.trim();
+            const text = textInput.value.trim();
+            
+            if (!author || !text) {
+                showToast('닉네임과 내용을 모두 올바르게 입력해주세요.', 'error');
+                return;
+            }
+
+            try {
+                const newComment = {
+                    author: author,
+                    text: text,
+                    createdAt: Date.now(),
+                    userId: currentUser.uid
+                };
+
+                // Save strictly to public path
+                await addDoc(commentsCollection, newComment);
+                
+                // Clear input elements
+                authorInput.value = '';
+                textInput.value = '';
+                
+                showToast('댓글이 성공적으로 등록되었습니다!', 'success');
+            } catch (err) {
+                console.error("Failed to add comment to cloud: ", err);
+                showToast("댓글 게시에 실패했습니다. 다시 시도해 주세요.", "error");
+            }
+        };
+
+        // HTML Escaper to prevent XSS
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    "'": '&#39;',
+                    '"': '&quot;'
+                }[tag] || tag)
+            );
+        }
+
+        // Custom Toast Notification Maker
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const bgClass = type === 'success' 
+                ? 'bg-emerald-500 dark:bg-emerald-600 text-white' 
+                : 'bg-red-500 dark:bg-red-600 text-white';
+            
+            toast.className = `flex items-center gap-2.5 px-4 py-3 rounded-xl shadow-lg text-sm font-semibold transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto ${bgClass}`;
+            toast.innerHTML = `<span>${message}</span>`;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Custom Delete Modal Handlers
+        window.openDeleteModal = function(id) {
+            commentToDeleteId = id;
+            const modal = document.getElementById('delete-modal');
+            const card = document.getElementById('delete-modal-card');
+            
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            card.classList.remove('scale-95');
+            card.classList.add('scale-100');
+        };
+
+        window.closeDeleteModal = function() {
+            commentToDeleteId = null;
+            const modal = document.getElementById('delete-modal');
+            const card = document.getElementById('delete-modal-card');
+            
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            card.classList.remove('scale-100');
+            card.classList.add('scale-95');
+        };
+
+        // Bind delete confirm button action (to Firestore)
+        document.getElementById('confirm-delete-btn').addEventListener('click', async function() {
+            if (commentToDeleteId && currentUser) {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'comments', commentToDeleteId);
+                    await deleteDoc(docRef);
+                    closeDeleteModal();
+                    showToast('댓글이 삭제되었습니다.', 'success');
+                } catch (err) {
+                    console.error("Failed to delete comment: ", err);
+                    showToast("댓글 삭제 도중 오류가 발생했습니다.", "error");
+                }
+            }
+        });
+
+        // Close modal when clicking dark background
+        document.getElementById('delete-modal').addEventListener('click', function(e) {
+            if (e.target.id === 'delete-modal') closeDeleteModal();
         });
 
         // Scroll Animation Element Reveal
@@ -267,8 +570,22 @@
         };
         
         window.addEventListener('scroll', handleScroll);
-        // Initial trigger for load
-        document.addEventListener("DOMContentLoaded", handleScroll);
+
+        // Periodically update the relative times on screen
+        setInterval(() => {
+            document.querySelectorAll('#comment-list [data-timestamp]').forEach(el => {
+                const timestamp = parseInt(el.getAttribute('data-timestamp'), 10);
+                if (timestamp) {
+                    el.textContent = formatTime(timestamp);
+                }
+            });
+        }, 30000); // Update every 30 seconds
+        
+        // Initializer
+        document.addEventListener("DOMContentLoaded", () => {
+            handleScroll();
+            authenticateAndSync(); // Start authentication first, then load Firestore lists
+        });
     </script>
 </body>
 </html>
