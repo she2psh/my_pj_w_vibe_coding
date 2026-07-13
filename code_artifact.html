@@ -1,101 +1,207 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>주말 순삭 인생 게임 6선 | 취향 저격 큐레이션</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Noto Sans KR Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
                         darker: '#121212',
                         card: '#1e1e1e',
                         neon: '#00f3ff',
+                        neonDark: '#0ea5e9', // 라이트모드에서의 활력소 역할을 할 딥 시안
                     },
                     fontFamily: { sans: ['"Noto Sans KR"', 'sans-serif'] }
                 }
             }
         }
     </script>
+    
     <style>
-        body { background-color: #121212; color: #ffffff; scroll-behavior: smooth; }
-        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
-        .reveal.active { opacity: 1; transform: translateY(0); }
-        .text-glow { text-shadow: 0 0 10px rgba(0, 243, 255, 0.7); }
+        /* 테마 변경 시 부드럽게 배경과 색상이 전환되도록 트랜지션 추가 */
+        body {
+            transition: background-color 0.5s ease, color 0.5s ease;
+            scroll-behavior: smooth;
+        }
+        .reveal { 
+            opacity: 0; 
+            transform: translateY(30px); 
+            transition: all 0.8s ease-out; 
+        }
+        .reveal.active { 
+            opacity: 1; 
+            transform: translateY(0); 
+        }
+        /* 텍스트 글로우 효과: 다크모드에서 더 빛나도록 설정 */
+        .text-glow { 
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.4); 
+        }
+        .dark .text-glow {
+            text-shadow: 0 0 15px rgba(0, 243, 255, 0.7);
+        }
     </style>
+    
+    <script>
+        // 초기 테마 설정을 깜빡임 없이 적용하기 위해 헤드 상단에서 실행
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        })();
+    </script>
 </head>
-<body class="antialiased font-sans">
+<body class="antialiased font-sans bg-slate-50 text-slate-900 dark:bg-darker dark:text-white min-h-screen">
 
-    <!-- Header -->
-    <header class="relative min-h-[60vh] flex items-center justify-center overflow-hidden">
-        <div class="relative z-10 text-center px-4 max-w-4xl mx-auto reveal active">
-            <h1 class="text-4xl sm:text-6xl font-black mb-6 leading-tight">
-                장르 불문, 당신의 주말을 <br>
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-neon to-blue-500 text-glow">순삭할 인생 게임 6선</span>
-            </h1>
-            <p class="text-gray-400">제 플레이 타임이 증명합니다. 깐깐하게 엄선한 취향 100% 반영 인생작 리스트.</p>
+    <!-- Floating Glassmorphism Navbar -->
+    <nav class="sticky top-0 z-40 w-full bg-white/75 dark:bg-darker/75 backdrop-blur-md border-b border-slate-200/80 dark:border-gray-800/80 transition-all duration-300">
+        <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+            <a href="#" class="flex items-center gap-2 font-black text-lg tracking-wider text-slate-900 dark:text-white">
+                <span class="w-3 h-3 rounded-full bg-gradient-to-tr from-neon to-blue-500 animate-pulse"></span>
+                GAME 6
+            </a>
+            
+            <!-- Dark / Light Mode Toggle Button -->
+            <button id="theme-toggle" class="relative inline-flex items-center justify-center p-2.5 rounded-xl bg-slate-100 dark:bg-gray-800 text-slate-700 dark:text-yellow-400 hover:bg-slate-200 dark:hover:bg-gray-700 transition-all duration-300 shadow-sm border border-slate-200 dark:border-gray-700 focus:outline-none" aria-label="화면 모드 전환">
+                <!-- Sun Icon (Visible in Dark Mode) -->
+                <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 transition-transform duration-300 rotate-0 dark:block hover:rotate-45" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464a1 1 0 10-1.414 1.414l.707.707a1 1 0 001.414-1.414l-.707-.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path>
+                </svg>
+                <!-- Moon Icon (Visible in Light Mode) -->
+                <svg id="theme-toggle-dark-icon" class="block w-5 h-5 transition-transform duration-300 dark:hidden hover:-rotate-12" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                </svg>
+            </button>
         </div>
+    </nav>
+
+    <!-- Header Hero Section -->
+    <header class="relative min-h-[50vh] flex items-center justify-center overflow-hidden py-12">
+        <div class="relative z-10 text-center px-4 max-w-4xl mx-auto reveal active">
+            <h1 class="text-4xl sm:text-6xl font-black mb-6 leading-tight transition-all">
+                장르 불문, 당신의 주말을 <br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-neonDark to-blue-600 dark:from-neon dark:to-blue-500 text-glow">
+                    순삭할 인생 게임 6선
+                </span>
+            </h1>
+            <p class="text-slate-600 dark:text-gray-400 max-w-2xl mx-auto text-base sm:text-lg">
+                제 플레이 타임이 증명합니다. 깐깐하게 엄선하고 직접 검증한 취향 100% 반영 주말 보장 인생작 리스트.
+            </p>
+        </div>
+        <!-- Decorative grid backgrounds -->
+        <div class="absolute inset-0 bg-[linear-gradient(to_right,#00000005_1px,transparent_1px),linear-gradient(to_bottom,#00000005_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] pointer-events-none"></div>
     </header>
 
     <!-- Main Content -->
-    <main class="max-w-6xl mx-auto px-4 py-12">
+    <main class="max-w-6xl mx-auto px-4 py-8 relative z-10">
         
         <!-- Section 1: Co-op -->
         <section id="section-01" class="py-12">
-            <h2 class="text-2xl font-bold mb-8 border-l-4 border-neon pl-4">#01 함께할 때 즐거움이 2배</h2>
+            <h2 class="text-2xl font-bold mb-8 border-l-4 border-cyan-500 dark:border-neon pl-4 tracking-tight">
+                #01 함께할 때 즐거움이 2배
+            </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <article class="bg-card rounded-2xl overflow-hidden border border-gray-800 hover:border-neon transition-all cursor-pointer relative group" 
+                <!-- Card 1 -->
+                <article class="bg-white dark:bg-card rounded-2xl overflow-hidden border border-slate-200/80 dark:border-gray-800 hover:border-cyan-500 dark:hover:border-neon transition-all duration-300 cursor-pointer relative group shadow-sm hover:shadow-md dark:shadow-none" 
                          onclick="openModal('그랑블루 판타지: 리링크', 'IETPDqkbDLg')">
-                    <div class="aspect-video relative overflow-hidden">
-                        <div class="absolute top-3 right-3 z-20 bg-neon text-darker text-xs font-bold px-3 py-1 rounded-full animate-pulse">🔥 NEW DLC</div>
-                        <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/881020/header.jpg" class="w-full h-full object-cover">
+                    <div class="aspect-video relative overflow-hidden bg-slate-900">
+                        <div class="absolute top-3 right-3 z-20 bg-cyan-500 dark:bg-neon text-white dark:text-darker text-xs font-bold px-3 py-1 rounded-full animate-pulse shadow-sm">
+                            🔥 NEW DLC
+                        </div>
+                        <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/881020/header.jpg" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="그랑블루 판타지: 리링크">
                     </div>
-                    <div class="p-6"><h4 class="text-xl font-bold mb-2">그랑블루 판타지: 리링크</h4><p class="text-gray-400 text-sm">코옵 액션의 끝판왕.</p></div>
+                    <div class="p-6">
+                        <h4 class="text-xl font-bold mb-2 group-hover:text-cyan-600 dark:group-hover:text-neon transition-colors duration-200">그랑블루 판타지: 리링크</h4>
+                        <p class="text-slate-500 dark:text-gray-400 text-sm">심장 뛰는 액션 롤플레잉과 코옵의 완벽한 융합.</p>
+                    </div>
                 </article>
 
-                <article class="bg-card rounded-2xl overflow-hidden border border-gray-800 hover:border-neon transition-all cursor-pointer" 
+                <!-- Card 2 -->
+                <article class="bg-white dark:bg-card rounded-2xl overflow-hidden border border-slate-200/80 dark:border-gray-800 hover:border-cyan-500 dark:hover:border-neon transition-all duration-300 cursor-pointer group shadow-sm hover:shadow-md dark:shadow-none" 
                          onclick="openModal('Rabbit and Steel', 'mZfcz9XtYVQ')">
-                    <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2132850/header.jpg" class="w-full aspect-video object-cover">
-                    <div class="p-6"><h4 class="text-xl font-bold mb-2">Rabbit and Steel</h4><p class="text-gray-400 text-sm">토끼들의 하드코어 탄막.</p></div>
+                    <div class="aspect-video relative overflow-hidden bg-slate-900">
+                        <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2132850/header.jpg" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Rabbit and Steel">
+                    </div>
+                    <div class="p-6">
+                        <h4 class="text-xl font-bold mb-2 group-hover:text-cyan-600 dark:group-hover:text-neon transition-colors duration-200">Rabbit and Steel</h4>
+                        <p class="text-slate-500 dark:text-gray-400 text-sm">귀여운 토끼들의 본격 하드코어 탄막 레이드 협동 액션.</p>
+                    </div>
                 </article>
 
-                <article class="bg-card rounded-2xl overflow-hidden border border-gray-800 hover:border-neon transition-all cursor-pointer" 
+                <!-- Card 3 -->
+                <article class="bg-white dark:bg-card rounded-2xl overflow-hidden border border-slate-200/80 dark:border-gray-800 hover:border-cyan-500 dark:hover:border-neon transition-all duration-300 cursor-pointer group shadow-sm hover:shadow-md dark:shadow-none" 
                          onclick="openModal('Slay the Spire 2', 'lYS66AZEtRA')">
-                    <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2868840/header.jpg" class="w-full aspect-video object-cover">
-                    <div class="p-6"><h4 class="text-xl font-bold mb-2">Slay the Spire 2</h4><p class="text-gray-400 text-sm">덱빌딩의 귀환.</p></div>
+                    <div class="aspect-video relative overflow-hidden bg-slate-900">
+                        <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2868840/header.jpg" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Slay the Spire 2">
+                    </div>
+                    <div class="p-6">
+                        <h4 class="text-xl font-bold mb-2 group-hover:text-cyan-600 dark:group-hover:text-neon transition-colors duration-200">Slay the Spire 2</h4>
+                        <p class="text-slate-500 dark:text-gray-400 text-sm">시간 루프를 끊어낼 수 있을 것인가, 전설적 덱빌딩의 귀환.</p>
+                    </div>
                 </article>
             </div>
         </section>
 
         <!-- Section 2: Hardcore -->
         <section class="py-12">
-            <h2 class="text-2xl font-bold mb-8 border-l-4 border-neon pl-4">#02 극한의 성취감</h2>
+            <h2 class="text-2xl font-bold mb-8 border-l-4 border-cyan-500 dark:border-neon pl-4 tracking-tight">
+                #02 극한의 성취감
+            </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <article class="bg-card rounded-2xl overflow-hidden border border-gray-800 hover:border-neon transition-all cursor-pointer" 
+                <!-- Card 4 -->
+                <article class="bg-white dark:bg-card rounded-2xl overflow-hidden border border-slate-200/80 dark:border-gray-800 hover:border-cyan-500 dark:hover:border-neon transition-all duration-300 cursor-pointer group shadow-sm hover:shadow-md dark:shadow-none" 
                          onclick="openModal('할로우 나이트: 실크송', 'yQxwbZsL14Y')">
-                    <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1030300/header.jpg" class="w-full aspect-video object-cover">
-                    <div class="p-6"><h4 class="text-xl font-bold mb-2">할로우 나이트: 실크송</h4><p class="text-gray-400 text-sm">호넷의 메트로배니아.</p></div>
+                    <div class="aspect-video relative overflow-hidden bg-slate-900">
+                        <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1030300/header.jpg" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="할로우 나이트: 실크송">
+                    </div>
+                    <div class="p-6">
+                        <h4 class="text-xl font-bold mb-2 group-hover:text-cyan-600 dark:group-hover:text-neon transition-colors duration-200">할로우 나이트: 실크송</h4>
+                        <p class="text-slate-500 dark:text-gray-400 text-sm">침묵을 깨고 날아오르는 호넷의 격렬하고 우아한 탐험 이야기.</p>
+                    </div>
                 </article>
             </div>
         </section>
 
         <!-- Section 3: Puzzle -->
         <section class="py-12">
-            <h2 class="text-2xl font-bold mb-8 border-l-4 border-neon pl-4">#03 발상의 전환</h2>
+            <h2 class="text-2xl font-bold mb-8 border-l-4 border-cyan-500 dark:border-neon pl-4 tracking-tight">
+                #03 발상의 전환
+            </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <article class="bg-card rounded-2xl overflow-hidden border border-gray-800 hover:border-neon cursor-pointer" onclick="openModal('바바 이즈 유', 'Ca5BYKRVXHM')">
-                    <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/736260/header.jpg" class="w-full aspect-video object-cover">
+                <!-- Card 5 -->
+                <article class="bg-white dark:bg-card rounded-2xl overflow-hidden border border-slate-200/80 dark:border-gray-800 hover:border-cyan-500 dark:hover:border-neon transition-all duration-300 cursor-pointer group shadow-sm hover:shadow-md dark:shadow-none" 
+                         onclick="openModal('바바 이즈 유', 'Ca5BYKRVXHM')">
+                    <div class="aspect-video relative overflow-hidden bg-slate-900">
+                        <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/736260/header.jpg" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="바바 이즈 유">
+                    </div>
                     <div class="p-6">
-                        <h4 class="text-xl font-bold mb-2">바바 이즈 유</h4><p class="text-gray-400 text-sm">규칙을 조작하는 퍼즐.</p>
+                        <h4 class="text-xl font-bold mb-2 group-hover:text-cyan-600 dark:group-hover:text-neon transition-colors duration-200">바바 이즈 유</h4>
+                        <p class="text-slate-500 dark:text-gray-400 text-sm">코딩 논리로 룰을 직접 무너뜨리고 재설정하는 뇌지컬 퍼즐.</p>
                     </div>
                 </article>
-                <article class="bg-card rounded-2xl overflow-hidden border border-gray-800 hover:border-neon cursor-pointer" onclick="openModal('스플릿 픽션', 'ry7A7RHvskM')">
-                    <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2001120/header.jpg" class="w-full aspect-video object-cover">
+
+                <!-- Card 6 -->
+                <article class="bg-white dark:bg-card rounded-2xl overflow-hidden border border-slate-200/80 dark:border-gray-800 hover:border-cyan-500 dark:hover:border-neon transition-all duration-300 cursor-pointer group shadow-sm hover:shadow-md dark:shadow-none" 
+                         onclick="openModal('스플릿 픽션', 'ry7A7RHvskM')">
+                    <div class="aspect-video relative overflow-hidden bg-slate-900">
+                        <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2001120/header.jpg" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="스플릿 픽션">
+                    </div>
                     <div class="p-6">
-                        <h4 class="text-xl font-bold mb-2">스플릿 픽션</h4><p class="text-gray-400 text-sm">화면을 쪼개는 코옵.</p>
+                        <h4 class="text-xl font-bold mb-2 group-hover:text-cyan-600 dark:group-hover:text-neon transition-colors duration-200">스플릿 픽션</h4>
+                        <p class="text-slate-500 dark:text-gray-400 text-sm">화면 자체를 물리적으로 쪼개고 넘겨가며 해결하는 신박한 기믹.</p>
                     </div>
                 </article>
             </div>
@@ -103,28 +209,66 @@
     </main>
 
     <!-- Modal -->
-    <div id="video-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 opacity-0 pointer-events-none transition-opacity">
-        <div class="bg-card w-full max-w-4xl mx-4 rounded-2xl overflow-hidden border border-neon/50">
-            <div class="flex justify-between items-center p-4 border-b border-gray-800">
-                <h3 id="modal-title" class="text-white font-bold text-lg">트레일러</h3>
-                <button onclick="closeModal()" class="text-white hover:text-neon">닫기</button>
+    <div id="video-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/95 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white dark:bg-card w-full max-w-4xl mx-4 rounded-2xl overflow-hidden border border-slate-200 dark:border-neon/50 shadow-2xl">
+            <div class="flex justify-between items-center p-4 border-b border-slate-200 dark:border-gray-800">
+                <h3 id="modal-title" class="text-slate-900 dark:text-white font-bold text-lg">트레일러</h3>
+                <button onclick="closeModal()" class="text-slate-500 dark:text-white hover:text-cyan-500 dark:hover:text-neon text-sm font-semibold transition-colors duration-200 focus:outline-none">
+                    닫기
+                </button>
             </div>
-            <div class="aspect-video relative"><iframe id="modal-iframe" class="w-full h-full" src="" frameborder="0" allowfullscreen></iframe></div>
+            <div class="aspect-video relative bg-black">
+                <iframe id="modal-iframe" class="w-full h-full" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
         </div>
     </div>
 
     <script>
+        // Modal Actions
         window.openModal = function(title, videoId) {
             const modal = document.getElementById('video-modal');
             modal.classList.remove('opacity-0', 'pointer-events-none');
-            document.getElementById('modal-iframe').src = `https://www.youtube-nocookie.com/embed/${videoId}?rel=0`;
+            document.getElementById('modal-iframe').src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0`;
             document.getElementById('modal-title').textContent = title;
         };
+        
         window.closeModal = () => { 
             document.getElementById('video-modal').classList.add('opacity-0', 'pointer-events-none'); 
             document.getElementById('modal-iframe').src = ''; 
         };
-        document.getElementById('video-modal').addEventListener('click', (e) => { if(e.target.id === 'video-modal') closeModal(); });
+        
+        document.getElementById('video-modal').addEventListener('click', (e) => { 
+            if(e.target.id === 'video-modal') closeModal(); 
+        });
+
+        // Theme Toggle Functionality
+        const themeToggleBtn = document.getElementById('theme-toggle');
+
+        themeToggleBtn.addEventListener('click', function() {
+            // Toggle 'dark' class on <html> element
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+
+        // Scroll Animation Element Reveal
+        const revealElements = document.querySelectorAll('.reveal');
+        const handleScroll = () => {
+            revealElements.forEach((el) => {
+                const rect = el.getBoundingClientRect();
+                if (rect.top < window.innerHeight - 50) {
+                    el.classList.add('active');
+                }
+            });
+        };
+        
+        window.addEventListener('scroll', handleScroll);
+        // Initial trigger for load
+        document.addEventListener("DOMContentLoaded", handleScroll);
     </script>
 </body>
 </html>
