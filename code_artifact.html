@@ -48,6 +48,47 @@
         .dark .text-glow {
             text-shadow: 0 0 15px rgba(0, 243, 255, 0.7);
         }
+
+        /* --- 개편된 모드별 호버 효과 (강도 축소 및 분리) --- */
+        /* 1. 라이트 모드: 눈이 편안하고 우아한 미니멀리즘 쉐도우 및 테두리 */
+        .cyber-card {
+            position: relative;
+            background: rgb(255, 255, 255);
+            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+        .cyber-card:hover {
+            border-color: #3b82f6; /* 자연스러운 블루 외곽선 */
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.08), 0 8px 10px -6px rgba(59, 130, 246, 0.08);
+        }
+
+        /* 2. 다크 모드: 속도를 대폭 늦추고 두께를 최소화한 절제된 네온 오라(Aura) */
+        .dark .cyber-card {
+            background: #1e1e1e; /* matches dark:bg-card */
+            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease;
+        }
+        .dark .cyber-card::before {
+            content: '';
+            position: absolute;
+            inset: -1.2px; /* 회전하는 네온 선 두께를 얇고 고급스럽게 변경 */
+            border-radius: 16px; /* 1rem = 16px (rounded-2xl) */
+            background: linear-gradient(90deg, #00f3ff, #3b82f6, #00f3ff);
+            background-size: 200% auto;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.4s ease-in-out;
+        }
+        .dark .cyber-card:hover::before {
+            opacity: 0.55; /* 너무 강하게 빛나지 않도록 반투명하게 낮춤 */
+            animation: neon-border-flow 3.5s linear infinite; /* 느리고 고요하게 회전 (기존 1.5초 -> 3.5초) */
+        }
+        .dark .cyber-card:hover {
+            box-shadow: 0 8px 22px -4px rgba(0, 243, 255, 0.12); /* 과하지 않은 후면 수채화 광채 효과 */
+        }
+
+        @keyframes neon-border-flow {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
     </style>
     
     <script>
@@ -114,10 +155,11 @@
                 #01 함께할 때 즐거움이 2배
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- -->
                 <!-- Card 1 -->
-                <article class="bg-white dark:bg-card rounded-2xl overflow-hidden border border-slate-200/80 dark:border-gray-800 hover:border-cyan-500 dark:hover:border-neon transition-all duration-300 cursor-pointer relative group shadow-sm hover:shadow-md dark:shadow-none" 
+                <article class="cyber-card bg-white dark:bg-card rounded-2xl border border-slate-200/80 dark:border-gray-800 transition-all duration-300 cursor-pointer relative group shadow-sm hover:shadow-md dark:shadow-none hover:-translate-y-1" 
                          onclick="openModal('그랑블루 판타지: 리링크', 'IETPDqkbDLg')">
-                    <div class="aspect-video relative overflow-hidden bg-slate-900">
+                    <div class="aspect-video relative overflow-hidden rounded-t-2xl bg-slate-900">
                         <div class="absolute top-3 right-3 z-20 bg-cyan-500 dark:bg-neon text-white dark:text-darker text-xs font-bold px-3 py-1 rounded-full animate-pulse shadow-sm">
                             🔥 NEW DLC
                         </div>
@@ -130,9 +172,9 @@
                 </article>
 
                 <!-- Card 2 -->
-                <article class="bg-white dark:bg-card rounded-2xl overflow-hidden border border-slate-200/80 dark:border-gray-800 hover:border-cyan-500 dark:hover:border-neon transition-all duration-300 cursor-pointer group shadow-sm hover:shadow-md dark:shadow-none" 
+                <article class="cyber-card bg-white dark:bg-card rounded-2xl border border-slate-200/80 dark:border-gray-800 transition-all duration-300 cursor-pointer group shadow-sm hover:shadow-md dark:shadow-none hover:-translate-y-1" 
                          onclick="openModal('Rabbit and Steel', 'mZfcz9XtYVQ')">
-                    <div class="aspect-video relative overflow-hidden bg-slate-900">
+                    <div class="aspect-video relative overflow-hidden rounded-t-2xl bg-slate-900">
                         <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2132850/header.jpg" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Rabbit and Steel">
                     </div>
                     <div class="p-6">
@@ -142,9 +184,9 @@
                 </article>
 
                 <!-- Card 3 -->
-                <article class="bg-white dark:bg-card rounded-2xl overflow-hidden border border-slate-200/80 dark:border-gray-800 hover:border-cyan-500 dark:hover:border-neon transition-all duration-300 cursor-pointer group shadow-sm hover:shadow-md dark:shadow-none" 
+                <article class="cyber-card bg-white dark:bg-card rounded-2xl border border-slate-200/80 dark:border-gray-800 transition-all duration-300 cursor-pointer group shadow-sm hover:shadow-md dark:shadow-none hover:-translate-y-1" 
                          onclick="openModal('Slay the Spire 2', 'lYS66AZEtRA')">
-                    <div class="aspect-video relative overflow-hidden bg-slate-900">
+                    <div class="aspect-video relative overflow-hidden rounded-t-2xl bg-slate-900">
                         <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2868840/header.jpg" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Slay the Spire 2">
                     </div>
                     <div class="p-6">
@@ -161,10 +203,11 @@
                 #02 극한의 성취감
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- -->
                 <!-- Card 4 -->
-                <article class="bg-white dark:bg-card rounded-2xl overflow-hidden border border-slate-200/80 dark:border-gray-800 hover:border-cyan-500 dark:hover:border-neon transition-all duration-300 cursor-pointer group shadow-sm hover:shadow-md dark:shadow-none" 
+                <article class="cyber-card bg-white dark:bg-card rounded-2xl border border-slate-200/80 dark:border-gray-800 transition-all duration-300 cursor-pointer group shadow-sm hover:shadow-md dark:shadow-none hover:-translate-y-1" 
                          onclick="openModal('할로우 나이트: 실크송', 'yQxwbZsL14Y')">
-                    <div class="aspect-video relative overflow-hidden bg-slate-900">
+                    <div class="aspect-video relative overflow-hidden rounded-t-2xl bg-slate-900">
                         <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1030300/header.jpg" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="할로우 나이트: 실크송">
                     </div>
                     <div class="p-6">
@@ -181,10 +224,11 @@
                 #03 발상의 전환
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- -->
                 <!-- Card 5 -->
-                <article class="bg-white dark:bg-card rounded-2xl overflow-hidden border border-slate-200/80 dark:border-gray-800 hover:border-cyan-500 dark:hover:border-neon transition-all duration-300 cursor-pointer group shadow-sm hover:shadow-md dark:shadow-none" 
+                <article class="cyber-card bg-white dark:bg-card rounded-2xl border border-slate-200/80 dark:border-gray-800 transition-all duration-300 cursor-pointer group shadow-sm hover:shadow-md dark:shadow-none hover:-translate-y-1" 
                          onclick="openModal('바바 이즈 유', 'Ca5BYKRVXHM')">
-                    <div class="aspect-video relative overflow-hidden bg-slate-900">
+                    <div class="aspect-video relative overflow-hidden rounded-t-2xl bg-slate-900">
                         <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/736260/header.jpg" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="바바 이즈 유">
                     </div>
                     <div class="p-6">
@@ -194,9 +238,9 @@
                 </article>
 
                 <!-- Card 6 -->
-                <article class="bg-white dark:bg-card rounded-2xl overflow-hidden border border-slate-200/80 dark:border-gray-800 hover:border-cyan-500 dark:hover:border-neon transition-all duration-300 cursor-pointer group shadow-sm hover:shadow-md dark:shadow-none" 
+                <article class="cyber-card bg-white dark:bg-card rounded-2xl border border-slate-200/80 dark:border-gray-800 transition-all duration-300 cursor-pointer group shadow-sm hover:shadow-md dark:shadow-none hover:-translate-y-1" 
                          onclick="openModal('스플릿 픽션', 'ry7A7RHvskM')">
-                    <div class="aspect-video relative overflow-hidden bg-slate-900">
+                    <div class="aspect-video relative overflow-hidden rounded-t-2xl bg-slate-900">
                         <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2001120/header.jpg" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="스플릿 픽션">
                     </div>
                     <div class="p-6">
